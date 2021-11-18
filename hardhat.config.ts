@@ -1,9 +1,9 @@
 import * as dotenv from "dotenv";
 
 import { HardhatUserConfig, task } from "hardhat/config";
+import "@typechain/hardhat";
 import "@nomiclabs/hardhat-etherscan";
 import "@nomiclabs/hardhat-waffle";
-import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 
@@ -23,8 +23,15 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.4",
+  solidity: {
+    compilers: [{ version: "0.8.6", settings: {} }],
+  },
+  defaultNetwork: "hardhat",
   networks: {
+    hardhat: {
+      gas: "auto",
+      gasPrice: "auto",
+    },
     ropsten: {
       url: process.env.ROPSTEN_URL || "",
       accounts:
@@ -32,8 +39,9 @@ const config: HardhatUserConfig = {
     },
   },
   gasReporter: {
-    enabled: process.env.REPORT_GAS !== undefined,
+    enabled: true,
     currency: "USD",
+    coinmarketcap: "70e83d95-7bfc-4a79-a4ac-62d8a06fffa6",
   },
   etherscan: {
     apiKey: process.env.ETHERSCAN_API_KEY,

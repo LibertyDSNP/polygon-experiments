@@ -3,8 +3,6 @@ import { ethers } from "hardhat";
 import { describe } from "mocha";
 import { BigNumber, Contract, ContractFactory } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import exp from "constants";
-import { keccak256 } from "ethers/lib/utils";
 
 describe("Registry", () => {
   const registeredURI = "http://www.example.com";
@@ -14,6 +12,7 @@ describe("Registry", () => {
   before(async () => {
     HandleContract = await ethers.getContractFactory("Registry");
     handleInstance = await HandleContract.deploy();
+    await handleInstance.deployed();
   });
 
   describe("deployment", () => {

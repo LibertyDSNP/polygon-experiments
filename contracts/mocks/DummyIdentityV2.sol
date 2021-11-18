@@ -5,7 +5,7 @@ pragma solidity >=0.8.0 <0.9.0;
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 
-// This is the main building block for smart contracts.
+// This Dummy Identity contract can accept NFTs.
 contract DummyIdentityV2 is IERC721Receiver {
     // Some string type variables to identify the token.
     // The `public` modifier makes a variable readable from outside the contract.
