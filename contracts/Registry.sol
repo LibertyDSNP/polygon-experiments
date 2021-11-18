@@ -11,7 +11,7 @@ contract Registry is IRegistry, ERC721URIStorage {
     using Counters for Counters.Counter;
     Counters.Counter private dsnpIds;
 
-    constructor() ERC721("DSNPHandle", "DSNPH") {
+    constructor() ERC721("DSNPRegistration", "DSNPR") {
         dsnpIds._value = 999;
     }
 
@@ -24,7 +24,7 @@ contract Registry is IRegistry, ERC721URIStorage {
         uint256 newItemId = dsnpIds.current();
         _mint(_recipient, newItemId);
         _setTokenURI(newItemId, _tokenURI);
-        emit RegisteredHandle(newItemId, _tokenURI);
+        emit RegisteredDNSPId(newItemId, _tokenURI);
         return newItemId;
     }
 }

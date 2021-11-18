@@ -6,27 +6,27 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 describe("Registry", () => {
   const registeredURI = "http://www.example.com";
-  let HandleContract: ContractFactory;
-  let handleInstance: Contract;
+  let RegistryContract: ContractFactory;
+  let registryInstance: Contract;
 
   before(async () => {
-    HandleContract = await ethers.getContractFactory("Registry");
-    handleInstance = await HandleContract.deploy();
-    await handleInstance.deployed();
+    RegistryContract = await ethers.getContractFactory("Registry");
+    registryInstance = await RegistryContract.deploy();
+    await registryInstance.deployed();
   });
 
   describe("deployment", () => {
     it("can be deployed and used and emits the expected events", async () => {
       const [user] = await ethers.getSigners();
       const rcpt = await (
-        await handleInstance.register(user.address, registeredURI)
+        await registryInstance.register(user.address, registeredURI)
       ).wait();
       const events =
-        rcpt?.events?.filter((x: any) => x.event === "RegisteredHandle") || [];
+        rcpt?.events?.filter((x: any) => x.event === "RegisteredDNSPId") || [];
       expect(events.length).to.eq(1);
 
       const abi = [
-        "event RegisteredHandle(uint256 indexed dsnpid, string indexed tokenURI)",
+        "event RegisteredDNSPId(uint256 indexed dsnpid, string indexed tokenURI)",
       ];
       const iface = new ethers.utils.Interface(abi);
       const res = iface.parseLog(events[0]);
@@ -45,15 +45,15 @@ describe("Registry", () => {
 
     before(async () => {
       [user] = await ethers.getSigners();
-      await expect(handleInstance.register(user.address, registeredURI)).to.not
-        .be.reverted;
+      await expect(registryInstance.register(user.address, registeredURI)).to
+        .not.be.reverted;
       erc721StorageContract = await ethers.getContractAt(
         "ERC721URIStorage",
-        handleInstance.address
+        registryInstance.address
       );
       erc721Contract = await ethers.getContractAt(
         "ERC721",
-        handleInstance.address
+        registryInstance.address
       );
     });
 
@@ -83,6 +83,8 @@ describe("Registry", () => {
     it("can be transferred to a smart contract that implements IERC721Receiver", async () => {
       const factory = await ethers.getContractFactory("DummyIdentityV2");
       const Dummy = await factory.deploy();
+
+      // This mints the token.
       await expect(
         erc721Contract.transferFrom(user.address, Dummy.address, expectedDSNPId)
       ).to.not.be.reverted;
