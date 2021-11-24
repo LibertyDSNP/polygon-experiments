@@ -4,8 +4,10 @@ import { describe } from "mocha";
 import { BigNumber, Contract, ContractFactory } from "ethers";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
+// https://ethereum-waffle.readthedocs.io/
 describe("Registry", () => {
-  const registeredURI = "http://www.example.com";
+  const abiCoder = ethers.utils.defaultAbiCoder;
+
   let RegistryContract: ContractFactory;
   let registryInstance: Contract;
 
@@ -16,10 +18,16 @@ describe("Registry", () => {
   });
 
   describe("deployment", () => {
+    const registeredURI = "http://www.example.com";
+    const handle = "Miguel";
+    const expectedID = BigNumber.from(
+      ethers.utils.keccak256(abiCoder.encode(["string"], [handle]))
+    ).toString();
+
     it("can be deployed and used and emits the expected events", async () => {
       const [user] = await ethers.getSigners();
       const rcpt = await (
-        await registryInstance.register(user.address, registeredURI)
+        await registryInstance.register(user.address, handle, registeredURI)
       ).wait();
       const events =
         rcpt?.events?.filter((x: any) => x.event === "RegisteredDNSPId") || [];
@@ -30,7 +38,7 @@ describe("Registry", () => {
       ];
       const iface = new ethers.utils.Interface(abi);
       const res = iface.parseLog(events[0]);
-      expect(res.args[0].toString()).to.eq("1000");
+      expect(res.args[0].toString()).to.eq(expectedID);
 
       const bytesURI = ethers.utils.toUtf8Bytes(registeredURI);
       expect(res.args[1].hash).to.eq(ethers.utils.keccak256(bytesURI));
@@ -38,15 +46,26 @@ describe("Registry", () => {
   });
 
   describe("ERC721 functions", () => {
+    const registeredURI = "http://www.example2.com";
+    const handle = "Julia";
+    const expectedDSNPId = BigNumber.from(
+      ethers.utils.keccak256(abiCoder.encode(["string"], [handle]))
+    ).toString();
+
     let user: SignerWithAddress;
     let erc721StorageContract: Contract;
     let erc721Contract: Contract;
-    const expectedDSNPId = 1000;
 
     before(async () => {
       [user] = await ethers.getSigners();
-      await expect(registryInstance.register(user.address, registeredURI)).to
-        .not.be.reverted;
+      // await expect(
+      //   registryInstance.register(user.address, handle, registeredURI)
+      // ).to.not.be.reverted;
+      await expect(
+        registryInstance.register(user.address, handle, registeredURI)
+      )
+        .to.emit(registryInstance, "RegisteredDNSPId")
+        .withArgs(expectedDSNPId, registeredURI);
       erc721StorageContract = await ethers.getContractAt(
         "ERC721URIStorage",
         registryInstance.address
@@ -63,13 +82,14 @@ describe("Registry", () => {
       expect(actualURI).to.eq(registeredURI);
     });
 
-    it("retuns correct owner", async () => {
+    it("returns correct owner", async () => {
       const actualOwner = await erc721Contract.ownerOf(expectedDSNPId);
       expect(actualOwner).to.eq(user.address);
     });
 
     it("can be transferred", async () => {
       const [newOwner] = await ethers.getSigners();
+      // this mints the token.
       await expect(
         erc721Contract.transferFrom(
           user.address,
@@ -80,6 +100,7 @@ describe("Registry", () => {
       const actualOwner = await erc721Contract.ownerOf(expectedDSNPId);
       expect(actualOwner).to.eq(user.address);
     });
+
     it("can be transferred to a smart contract that implements IERC721Receiver", async () => {
       const factory = await ethers.getContractFactory("DummyIdentityV2");
       const Dummy = await factory.deploy();
@@ -91,6 +112,45 @@ describe("Registry", () => {
 
       const actualOwner = await erc721Contract.ownerOf(expectedDSNPId);
       expect(actualOwner).to.eq(Dummy.address);
+    });
+
+    it("cannot register identical handles under any conditions", async () => {
+      const [anotherSigner] = await ethers.getSigners();
+      await expect(
+        registryInstance.register(user.address, handle, registeredURI)
+      ).to.be.reverted;
+      await expect(
+        registryInstance.register(anotherSigner.address, handle, registeredURI)
+      ).to.be.reverted;
+      await expect(
+        registryInstance.register(
+          anotherSigner.address,
+          handle,
+          "http://www.placekitten.com"
+        )
+      ).to.be.reverted;
+    });
+
+    it("can register multiple DSNP Ids for the same user", async () => {
+      await expect(
+        registryInstance.register(
+          user.address,
+          "Nic",
+          "http://placecage.com/800/600"
+        )
+      ).to.not.be.reverted;
+    });
+  });
+  describe("Security", () => {
+    it("cannot request a token for anyone but oneself", async () => {
+      const nonSigner = "0xBcd4042DE499D14e55001CcbB24a551F3b954096";
+      await expect(
+        registryInstance.register(
+          nonSigner,
+          "Hello Kitty",
+          "http://www.example.com"
+        )
+      ).to.be.revertedWith("Registry: caller is not recipient");
     });
   });
 });

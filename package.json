@@ -4,7 +4,6 @@
     "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.7",
     "@nomiclabs/hardhat-waffle": "^2.0.1",
-    "@openzeppelin/test-helpers": "^0.5.15",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
     "@types/chai": "^4.2.22",
@@ -37,5 +36,19 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.3.3"
+  },
+  "scripts": {
+    "clean": "npx hardhat clean",
+    "build": "npm run clean && npx hardhat compile",
+    "hardhat": "hardhat",
+    "console": "hardhat console",
+    "test": "NODE_ENV=test hardhat test",
+    "deploy:devnet": "hardhat run ./scripts/deploy.ts --network devnet --verbose",
+    "deploy:testnet": "hardhat run ./scripts/deploy.ts --network mumbai --verbose",
+    "deploy:localhost": "hardhat run ./scripts/deploy.ts --network localhost --verbose",
+    "format": "prettier --write \"**/*.{sol,js,ts}\"",
+    "lint:sol": "solhint contracts/**/*.sol",
+    "lint:prettier": "prettier -c \"**/*.{sol,js,ts}\"",
+    "lint": "solhint \"contracts/**/*.sol\" && prettier -c \"**/*.{sol,js,ts}\""
   }
 }

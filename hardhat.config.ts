@@ -32,14 +32,28 @@ const config: HardhatUserConfig = {
       gas: "auto",
       gasPrice: "auto",
     },
-    ropsten: {
-      url: process.env.ROPSTEN_URL || "",
+    localhost: {
+      gas: "auto",
+      gasPrice: "auto",
+      gasMultiplier: 1,
+      url: "http://127.0.0.1:1317",
+      chainId: 137,
+      // accounts: getAccounts("localhost"),
+    },
+    // chainstack labls uses chainid 80001
+    mumbai: {
+      chainId: 80001,
+      gas: "auto",
+      gasPrice: "auto",
+      url: "https://rpc-mumbai.maticvigil.com",
       accounts:
-        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+        process.env.MUMBAI_PRIVATE_KEY !== undefined
+          ? [process.env.MUMBAI_PRIVATE_KEY]
+          : [],
     },
   },
   gasReporter: {
-    enabled: true,
+    enabled: process.env.SHOW_GAS === "true",
     currency: "USD",
     coinmarketcap: process.env.COINMARKETCAP_API_KEY,
   },

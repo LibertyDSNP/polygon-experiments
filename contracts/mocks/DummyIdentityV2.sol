@@ -1,12 +1,11 @@
-// Solidity files have to start with this pragma.
-// It will be used by the Solidity compiler to validate its version.
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity >=0.8.0 <0.9.0;
 
 import "hardhat/console.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "../DSNPERC721Receiver.sol";
 
 // This Dummy Identity contract can accept NFTs.
-contract DummyIdentityV2 is IERC721Receiver {
+contract DummyIdentityV2 is DSNPERC721Receiver {
     // Some string type variables to identify the token.
     // The `public` modifier makes a variable readable from outside the contract.
     string private name = "";
@@ -34,11 +33,6 @@ contract DummyIdentityV2 is IERC721Receiver {
     function getVersion() public view returns (string memory) {
         //        console.log("getting version from DummyIdentityV2");
         return version;
-    }
-
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
-    external override returns (bytes4) {
-        return IERC721Receiver.onERC721Received.selector;
     }
 }
 
