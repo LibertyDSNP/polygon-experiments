@@ -24,12 +24,31 @@
     "ethers": "^5.5.1",
     "hardhat": "^2.6.8",
     "hardhat-gas-reporter": "^1.0.4",
+    "mocha": "^7.2.0",
     "prettier": "^2.4.1",
     "prettier-plugin-solidity": "^1.0.0-beta.13",
     "solhint": "^3.3.6",
+    "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.7.17",
     "ts-node": "^10.4.0",
     "typechain": "^5.2.0",
     "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.3.3"
+  },
+  "scripts": {
+    "clean": "npx hardhat clean",
+    "build": "npm run clean && npx hardhat compile",
+    "hardhat": "hardhat",
+    "console": "hardhat console",
+    "test": "NODE_ENV=test hardhat test",
+    "deploy:devnet": "hardhat run ./scripts/deploy.ts --network devnet --verbose",
+    "deploy:testnet": "hardhat run ./scripts/deploy.ts --network mumbai --verbose",
+    "deploy:localhost": "hardhat run ./scripts/deploy.ts --network localhost --verbose",
+    "format": "prettier --write \"**/*.{sol,js,ts}\"",
+    "lint:sol": "solhint contracts/**/*.sol",
+    "lint:prettier": "prettier -c \"**/*.{sol,js,ts}\"",
+    "lint": "solhint \"contracts/**/*.sol\" && prettier -c \"**/*.{sol,js,ts}\""
   }
 }
